@@ -1,0 +1,68 @@
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (seront dans volume Docker)
+uploads/
+
+# Migrations (optionnel selon stratégie)
+# migrations/
+
+# Scripts dev
+scripts/
+
+# Tests
+tests/
+
+# Database local
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentation
+docs/
