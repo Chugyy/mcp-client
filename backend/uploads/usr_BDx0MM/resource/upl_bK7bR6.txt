@@ -1,0 +1,153 @@
+FAQ TECHNIQUE - PLATEFORME AI CLIENT
+======================================
+
+Mise à jour: 1er Décembre 2024
+
+## QUESTIONS GÉNÉRALES
+
+### Q1: Quelle est la différence entre un agent et un serveur MCP?
+R: Un agent est une instance d'IA configurée avec un prompt système spécifique pour répondre à des tâches particulières. Un serveur MCP (Model Context Protocol) est un service externe qui fournit des outils (tools) que les agents peuvent utiliser pour étendre leurs capacités (ex: accès à des APIs, bases de données, etc.).
+
+### Q2: Puis-je créer un agent sans ressources RAG?
+R: Oui, absolument. Les ressources RAG sont optionnelles. Un agent peut fonctionner uniquement avec son prompt système et éventuellement des serveurs MCP. Les ressources RAG sont utiles pour donner accès à des connaissances documentaires spécifiques.
+
+### Q3: Combien de temps prend l'ingestion d'un document?
+R: Cela dépend de la taille du document:
+- Petit fichier (< 1MB): 5-30 secondes
+- Fichier moyen (1-5MB): 30 secondes - 2 minutes
+- Gros fichier (5-10MB): 2-5 minutes
+Le processus inclut l'extraction de texte, le chunking, la génération d'embeddings et l'indexation.
+
+### Q4: Quelle est la limite de taille pour les uploads?
+R: La limite est de 10MB par fichier. Si vous avez besoin d'uploader des fichiers plus volumineux, contactez le support pour une augmentation de quota.
+
+## QUESTIONS SUR LES RESSOURCES RAG
+
+### Q5: Quels formats de fichiers sont supportés?
+R: Les formats supportés sont:
+- PDF (.pdf)
+- Microsoft Word (.doc, .docx)
+- Microsoft Excel (.xls, .xlsx)
+- Microsoft PowerPoint (.ppt, .pptx)
+- Texte brut (.txt)
+Pour d'autres formats, une conversion préalable est nécessaire.
+
+### Q6: Comment fonctionne le chunking des documents?
+R: Le système découpe automatiquement vos documents en morceaux (chunks) de taille optimale pour l'indexation. Les paramètres par défaut sont:
+- Taille de chunk: 1000 tokens
+- Overlap: 200 tokens
+- Stratégie: Découpage sémantique avec préservation des paragraphes
+
+### Q7: Puis-je choisir un autre modèle d'embedding?
+R: Actuellement, seul text-embedding-3-large d'OpenAI est supporté (dimension 3072). Le support de modèles personnalisés est prévu pour Q1 2025.
+
+### Q8: Comment sont indexés les embeddings?
+R: Les embeddings sont stockés dans PostgreSQL avec l'extension pgvector. Nous utilisons l'algorithme HNSW (Hierarchical Navigable Small World) pour la recherche de similarité, offrant un excellent compromis entre vitesse et précision.
+
+### Q9: Que signifient les différents statuts d'une ressource?
+R: Les statuts possibles sont:
+- pending: Ressource créée, en attente d'ingestion
+- processing: Ingestion en cours
+- ready: Ressource indexée et prête à être utilisée
+- failed: Erreur lors de l'ingestion (vérifier error_message)
+
+### Q10: Puis-je réindexer une ressource?
+R: Oui, il suffit de relancer l'ingestion. Cela supprimera les anciens chunks et embeddings et recréera tout à partir des fichiers uploadés.
+
+## QUESTIONS SUR LES SERVEURS MCP
+
+### Q11: Comment connecter un serveur MCP avec authentification OAuth?
+R: Lors de la création du serveur:
+1. Sélectionnez "OAuth" comme type d'authentification
+2. Le système générera une URL d'autorisation
+3. Une popup s'ouvrira automatiquement pour l'authentification
+4. Une fois autorisé, le statut passera à "active"
+
+### Q12: Que faire si un serveur MCP est "unreachable"?
+R: Vérifiez:
+1. L'URL du serveur est correcte et accessible
+2. Le serveur est démarré et répond
+3. Pas de problème de firewall/réseau
+4. Les credentials sont valides (si auth requise)
+Vous pouvez cliquer sur "Sync" pour retenter la connexion.
+
+### Q13: Comment synchroniser les tools d'un serveur MCP?
+R: Cliquez sur le bouton "Sync" sur la carte du serveur. Le système interrogera le serveur MCP, récupérera la liste des tools disponibles et mettra à jour la base de données. Si le serveur a ajouté de nouveaux tools, ils apparaîtront automatiquement.
+
+### Q14: Puis-je désactiver certains tools d'un serveur MCP?
+R: Oui, après synchronisation, vous pouvez accéder à la liste des tools du serveur et désactiver individuellement ceux que vous ne souhaitez pas utiliser. Les tools désactivés ne seront pas proposés aux agents.
+
+## QUESTIONS SUR LES AGENTS
+
+### Q15: Quelle est la différence entre un agent système et un agent utilisateur?
+R: Les agents système sont créés par l'équipe plateforme et sont disponibles pour tous les utilisateurs (en lecture seule). Les agents utilisateurs sont créés par vous et vous appartiennent. Vous pouvez les modifier et les supprimer librement.
+
+### Q16: Comment configurer un agent pour utiliser une ressource RAG?
+R: Dans les paramètres de l'agent, allez dans la section "Configurations", puis "Ajouter une ressource". Sélectionnez la ressource souhaitée et activez-la. L'agent aura alors accès aux documents indexés dans cette ressource lors des conversations.
+
+### Q17: Combien de ressources et serveurs MCP un agent peut-il utiliser?
+R: Il n'y a pas de limite stricte, mais nous recommandons:
+- Maximum 5 ressources RAG par agent (pour maintenir la pertinence)
+- Maximum 3 serveurs MCP par agent (pour limiter la latence)
+
+### Q18: Les agents peuvent-ils utiliser plusieurs modèles d'IA?
+R: Oui, vous pouvez sélectionner le modèle lors de chaque conversation:
+- GPT-4 Turbo (recommandé pour des tâches complexes)
+- GPT-3.5 Turbo (plus rapide et économique)
+- Claude 3 Opus (excellent pour l'analyse et la rédaction)
+- Claude 3 Sonnet (bon compromis vitesse/qualité)
+
+## QUESTIONS SUR LA SÉCURITÉ
+
+### Q19: Comment sont stockées mes clés API?
+R: Toutes les clés API sont chiffrées avec AES-256 avant d'être stockées en base de données. Elles ne sont déchiffrées qu'au moment de l'utilisation et ne sont jamais exposées dans les logs ou l'interface.
+
+### Q20: Les données de mes documents sont-elles partagées avec d'autres utilisateurs?
+R: Non, vos données sont strictement privées. Chaque ressource est associée à votre compte utilisateur et n'est accessible qu'à vos agents. L'isolation des données est garantie au niveau base de données.
+
+### Q21: Où sont stockés mes documents uploadés?
+R: Les fichiers sont stockés sur notre infrastructure cloud sécurisée avec:
+- Chiffrement at-rest
+- Backup quotidien avec rétention 30 jours
+- Accès restreint par authentification
+- Logs d'audit sur tous les accès
+
+### Q22: Puis-je exporter mes données?
+R: Oui, vous pouvez à tout moment exporter:
+- Vos agents et leurs configurations
+- Vos ressources et fichiers uploadés
+- Vos conversations (historique de chat)
+Contactez le support pour initier un export complet.
+
+## QUESTIONS SUR LA PERFORMANCE
+
+### Q23: Pourquoi ma recherche RAG est-elle lente?
+R: Plusieurs facteurs peuvent influencer la vitesse:
+- Taille de la ressource (nombre de chunks indexés)
+- Complexité de la requête
+- Charge du serveur
+Le temps de réponse typique est de 200-500ms pour une recherche RAG.
+
+### Q24: Comment optimiser les performances de mon agent?
+R: Recommandations:
+- Limitez le nombre de ressources RAG actives
+- Utilisez des prompts clairs et concis
+- Préférez GPT-3.5 pour des tâches simples
+- Désactivez les tools MCP non nécessaires
+- Nettoyez régulièrement les anciennes ressources
+
+### Q25: Y a-t-il des limites de rate limiting?
+R: Oui, pour garantir la qualité de service:
+- API publique: 100 requêtes/minute
+- Création d'agents: 10/heure
+- Upload de fichiers: 20/heure
+- Ingestion RAG: 5 simultanées
+Contactez le support pour des quotas personnalisés.
+
+## CONTACT SUPPORT
+
+Pour toute question non couverte par cette FAQ:
+- Email: support@ai-client.com
+- Chat: Disponible dans l'interface (coin inférieur droit)
+- Documentation: https://docs.ai-client.com
+- Community: https://community.ai-client.com

@@ -1,0 +1,252 @@
+NOTES DE VERSION - PLATEFORME AI CLIENT
+========================================
+
+## Version 2.0.0 - 1er Décembre 2024
+
+### 🎉 NOUVELLES FONCTIONNALITÉS MAJEURES
+
+#### Système de Ressources RAG Complet
+- Création et gestion de ressources documentaires
+- Upload de fichiers multiformats (PDF, DOCX, XLSX, PPTX, TXT)
+- Chunking intelligent avec préservation du contexte sémantique
+- Génération automatique d'embeddings avec text-embedding-3-large (3072 dimensions)
+- Indexation vectorielle via pgvector avec algorithme HNSW
+- Recherche sémantique optimisée (top-k configurable)
+- Processus d'ingestion asynchrone avec suivi du statut
+- Gestion des erreurs d'ingestion avec messages détaillés
+- Support de l'auto-ingestion lors de la création
+
+#### Interface de Gestion des Ressources
+- Page dédiée pour la gestion des ressources (/ressources)
+- Cartes visuelles avec statut en temps réel
+- Modal de création/édition avec drag & drop
+- Upload multiple de fichiers
+- Visualisation des chunks indexés
+- Badges de statut colorés (pending, processing, ready, failed)
+- Bouton d'ingestion avec feedback visuel
+- Recherche et filtrage des ressources
+- Gestion des uploads (suppression, métadonnées)
+
+#### Architecture Frontend React Query
+- Migration complète vers React Query pour la gestion d'état
+- Cache intelligent avec invalidation automatique
+- Optimistic updates pour une UX fluide
+- Gestion centralisée des erreurs avec toasts
+- Loading states automatiques
+- Pattern service/hooks réutilisable
+- Types TypeScript stricts end-to-end
+
+### 🔧 AMÉLIORATIONS
+
+#### Performance
+- Réduction du temps d'ingestion de 40% grâce au chunking optimisé
+- Cache React Query configuré pour minimiser les requêtes réseau
+- Lazy loading des uploads dans les modals
+- Debounce sur la recherche de ressources
+
+#### Sécurité
+- Validation des types MIME côté backend
+- Limite de taille de fichier configurable (10MB par défaut)
+- Sanitization des noms de fichiers
+- Vérification des permissions sur les uploads
+- Logs d'audit sur toutes les opérations sensibles
+
+#### UX/UI
+- Design System cohérent avec Shadcn UI
+- Feedbacks visuels sur toutes les actions
+- Messages d'erreur clairs et actionnables
+- États de chargement avec spinners
+- Animations fluides pour les transitions
+- Responsive design pour mobile et tablette
+
+### 🐛 CORRECTIONS DE BUGS
+
+#### Ressources
+- Fix: Les ressources désactivées n'apparaissent plus dans la recherche RAG
+- Fix: Correction du calcul du chunk_count après ingestion
+- Fix: Gestion correcte des caractères spéciaux dans les noms de fichiers
+- Fix: Timeout augmenté pour l'ingestion de gros documents
+
+#### Agents
+- Fix: Les agents système ne peuvent plus être supprimés par erreur
+- Fix: Validation du format des tags (lowercase uniquement)
+- Fix: Correction de la duplication de tags lors de la mise à jour
+
+#### Chat
+- Fix: L'historique se charge maintenant correctement après refresh
+- Fix: Les métadonnées de message sont préservées
+- Fix: Correction du streaming pour les longues réponses
+
+#### MCP Servers
+- Fix: OAuth redirect URL correcte en production
+- Fix: Health check ne bloque plus le démarrage
+- Fix: Synchronisation des tools plus robuste avec retry
+
+### 📚 DOCUMENTATION
+
+- Nouveau guide d'architecture API (API_ARCHITECTURE.md)
+- Plan de test complet pour le module Ressources
+- Exemples de code Python pour l'API
+- FAQ technique étendue
+- Documentation des procédures internes
+- Schémas d'architecture mis à jour
+
+### 🔄 CHANGEMENTS CASSANTS (BREAKING CHANGES)
+
+#### API Backend
+- **ATTENTION**: L'endpoint GET /resources retourne maintenant un tableau simple au lieu d'un objet avec clé "resources"
+- Le champ `user_id` sur Upload peut être null si associé à une resource
+- Nouveaux champs obligatoires sur Resource: `embedding_model`, `embedding_dim`
+
+#### Frontend
+- Migration de useState vers React Query pour les ressources
+- Changement des imports: utiliser @/services/resources au lieu de @/lib/api
+- Les types Resource et Upload ont été déplacés vers resources.types.ts
+
+### 📦 DÉPENDANCES
+
+#### Backend (nouvelles)
+- pgvector==0.2.4 (pour indexation vectorielle)
+- pypdf==3.17.0 (pour extraction PDF)
+- python-docx==1.1.0 (pour extraction Word)
+- openpyxl==3.1.2 (pour extraction Excel)
+- python-pptx==0.6.23 (pour extraction PowerPoint)
+
+#### Frontend (nouvelles)
+- @tanstack/react-query@5.28.0 (state management)
+- sonner@1.4.0 (toast notifications)
+
+#### Mises à jour
+- fastapi: 0.110.0 → 0.111.0
+- next: 14.1.0 → 14.2.0
+- react: 18.2.0 → 18.3.0
+
+### 🚀 MIGRATIONS
+
+Pour migrer de v1.x vers v2.0.0:
+
+1. **Base de données**
+   ```sql
+   -- Ajouter les colonnes pour RAG
+   ALTER TABLE resources ADD COLUMN embedding_model VARCHAR(100) DEFAULT 'text-embedding-3-large';
+   ALTER TABLE resources ADD COLUMN embedding_dim INTEGER DEFAULT 3072;
+   ALTER TABLE resources ADD COLUMN chunk_count INTEGER DEFAULT 0;
+   ALTER TABLE resources ADD COLUMN indexed_at TIMESTAMP NULL;
+   ALTER TABLE resources ADD COLUMN error_message TEXT NULL;
+
+   -- Installer l'extension pgvector
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+
+2. **Backend Python**
+   ```bash
+   pip install -r requirements.txt
+   alembic upgrade head
+   ```
+
+3. **Frontend**
+   ```bash
+   npm install
+   npm run build
+   ```
+
+4. **Variables d'environnement**
+   ```env
+   # Nouvelles variables requises
+   MAX_UPLOAD_SIZE_MB=10
+   UPLOAD_DIR=/app/uploads
+   CHUNK_SIZE=1000
+   CHUNK_OVERLAP=200
+   ```
+
+### 📊 MÉTRIQUES
+
+#### Performance (benchmarks sur 1000 documents)
+- Temps d'ingestion moyen: 2.3s (vs 3.8s en v1.x)
+- Temps de recherche RAG: 180ms (vs 420ms en v1.x)
+- Taux de cache hit (React Query): 78%
+- Réduction des requêtes réseau: -45%
+
+#### Qualité
+- Couverture de tests: 87% (vs 72% en v1.x)
+- 0 erreur TypeScript (vs 24 en v1.x)
+- Score Lighthouse: 94/100 (vs 81/100 en v1.x)
+- Temps de build production: 45s (vs 62s en v1.x)
+
+### 🎯 PROCHAINES ÉTAPES
+
+#### v2.1.0 (Janvier 2025)
+- Support de modèles d'embedding personnalisés
+- Amélioration du chunking avec stratégies adaptatives
+- Export/Import de ressources
+- API de monitoring en temps réel
+
+#### v2.2.0 (Février 2025)
+- Multi-tenancy complet
+- Webhooks pour événements système
+- Intégrations Zapier et Make
+- Dashboard analytics avancé
+
+#### v3.0.0 (Q2 2025)
+- Architecture microservices
+- Support Kubernetes
+- Mobile app (iOS/Android)
+- Marketplace de prompts et agents
+
+### 👥 CONTRIBUTEURS
+
+Merci à tous les contributeurs de cette version:
+- @hugo - Lead développeur backend & frontend
+- @marie - UI/UX design
+- @thomas - Tests & QA
+- @julie - Documentation
+- @pierre - DevOps & Infrastructure
+
+### 📞 SUPPORT
+
+Pour toute question sur cette version:
+- Email: support@ai-client.com
+- Slack: #v2-0-support
+- Documentation: https://docs.ai-client.com/v2.0
+- Changelog complet: https://github.com/ai-client/platform/releases/v2.0.0
+
+---
+
+## Version 1.8.2 - 15 Novembre 2024
+
+### 🐛 Corrections
+- Fix: Timeout OAuth sur serveurs MCP
+- Fix: Validation email plus stricte
+- Fix: Encodage UTF-8 dans les messages de chat
+
+### 🔧 Améliorations
+- Performance: Optimisation des requêtes SQL agents
+- UX: Ajout d'un indicateur de typing dans le chat
+- Logs: Amélioration du format des logs système
+
+---
+
+## Version 1.8.1 - 1er Novembre 2024
+
+### 🐛 Corrections
+- Fix: Rate limiting trop strict sur /chat
+- Fix: Refresh token ne se renouvelle pas correctement
+- Fix: CSS cassé sur mobile (< 768px)
+
+---
+
+## Version 1.8.0 - 15 Octobre 2024
+
+### 🎉 Nouveautés
+- Ajout du support Claude 3 Opus et Sonnet
+- Interface de sélection de modèle dans le chat
+- Système de tags pour organiser les agents
+
+### 🔧 Améliorations
+- Migration vers Next.js 14 App Router
+- Nouveau design du chat avec markdown rendering
+- Amélioration de la gestion des erreurs réseau
+
+---
+
+Pour l'historique complet: https://github.com/ai-client/platform/blob/main/CHANGELOG.md

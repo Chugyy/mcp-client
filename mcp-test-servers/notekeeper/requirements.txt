@@ -1,0 +1,6 @@
+fastmcp>=2.10.5
+uvicorn[standard]
+python-dotenv
+python-jose
+starlette
+sqlalchemy>=2.0.41

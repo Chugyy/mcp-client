@@ -1,0 +1,100 @@
+DOCUMENTATION PRODUIT - PLATEFORME AI CLIENT
+==============================================
+
+Version: 2.0.0
+Date: 1er Décembre 2024
+Auteur: Équipe Produit
+
+## PRÉSENTATION GÉNÉRALE
+
+La Plateforme AI Client est une solution complète de gestion d'agents intelligents permettant aux entreprises d'automatiser leurs processus métier grâce à l'intelligence artificielle.
+
+## FONCTIONNALITÉS PRINCIPALES
+
+### 1. Gestion des Agents
+- Création et configuration d'agents personnalisés
+- Définition de prompts système avancés
+- Système de tags pour organiser les agents
+- Activation/désactivation à la demande
+- Support des agents système prédéfinis
+
+### 2. Gestion des Ressources RAG
+- Upload de documents multiformats (PDF, DOCX, TXT, XLSX, PPTX)
+- Chunking intelligent des documents
+- Génération automatique d'embeddings avec text-embedding-3-large
+- Indexation vectorielle pour recherche sémantique
+- Limite de taille: 10MB par fichier
+- Formats supportés: PDF, Word, Excel, PowerPoint, Texte brut
+
+### 3. Système de Chat
+- Conversations contextuelles avec les agents
+- Historique complet des messages
+- Support du streaming de réponses
+- Intégration avec les ressources RAG
+- Métadonnées enrichies sur chaque message
+
+### 4. Serveurs MCP (Model Context Protocol)
+- Connexion à des serveurs MCP externes
+- Authentification API-key et OAuth
+- Synchronisation automatique des tools
+- Health checks réguliers
+- Support de multiples serveurs simultanément
+
+### 5. Automatisations
+- Workflows personnalisables
+- Triggers événementiels
+- Steps configurables
+- Gestion des erreurs et retry
+- Logs d'exécution détaillés
+
+## ARCHITECTURE TECHNIQUE
+
+### Backend
+- Framework: FastAPI (Python)
+- Base de données: PostgreSQL avec pgvector
+- Cache: Redis
+- File storage: Système de fichiers local
+- API: REST avec documentation OpenAPI automatique
+
+### Frontend
+- Framework: Next.js 14 (App Router)
+- UI: React avec TypeScript
+- State management: React Query + Zustand
+- Styling: Tailwind CSS + Shadcn UI
+- Validation: Zod schemas
+
+### Sécurité
+- Authentification: JWT avec cookies httpOnly
+- Authorization: RBAC (Role-Based Access Control)
+- Encryption: AES-256 pour les clés API
+- CORS configuré avec whitelist
+- Rate limiting sur les endpoints sensibles
+
+## LIMITES ET CONTRAINTES
+
+- Taille maximale des uploads: 10MB
+- Nombre maximum d'agents par utilisateur: 100
+- Dimension des embeddings: 3072 (text-embedding-3-large)
+- Timeout des requêtes API: 30 secondes
+- Taux de refresh du token: 7 jours
+
+## ROADMAP
+
+### Q1 2025
+- Support de modèles d'embedding personnalisés
+- Amélioration du chunking avec stratégies adaptatives
+- Interface de monitoring temps réel
+- Export/Import de configurations
+
+### Q2 2025
+- Multi-tenancy complet
+- Marketplace de prompts et agents
+- Intégration Zapier et Make
+- Mobile app (iOS et Android)
+
+## SUPPORT ET CONTACT
+
+Email: support@ai-client.com
+Documentation: https://docs.ai-client.com
+Status: https://status.ai-client.com
+Community: https://community.ai-client.com

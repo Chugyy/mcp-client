@@ -1,0 +1,131 @@
+PROCÉDURES INTERNES - DÉPARTEMENT IT
+=====================================
+
+Document: PRO-IT-001
+Version: 3.2
+Date de révision: 1er Décembre 2024
+Validé par: Direction IT
+
+## 1. PROCÉDURE D'ONBOARDING DES NOUVEAUX EMPLOYÉS
+
+### 1.1 Jour J-5 (avant l'arrivée)
+- Créer le compte utilisateur dans l'Active Directory
+- Provisionner l'adresse email @company.com
+- Commander le matériel informatique (laptop, écran, clavier, souris)
+- Créer les accès aux outils métier selon le département
+- Ajouter dans les groupes Slack appropriés
+
+### 1.2 Jour J (jour d'arrivée)
+- Remettre le matériel informatique configuré
+- Faire signer la charte informatique
+- Formation aux outils de sécurité (2FA, VPN, password manager)
+- Configuration du poste de travail
+- Premier login et changement du mot de passe temporaire
+
+### 1.3 Jour J+1
+- Session de formation aux outils collaboratifs (30min)
+- Présentation de l'intranet et des ressources IT
+- Configuration du VPN et tests de connexion à distance
+- Vérification des accès aux applications métier
+
+## 2. PROCÉDURE DE GESTION DES INCIDENTS
+
+### 2.1 Classification des incidents
+- P1 (Critique): Service down affectant > 50% des utilisateurs - Résolution < 1h
+- P2 (Majeur): Fonctionnalité importante indisponible - Résolution < 4h
+- P3 (Mineur): Bug n'affectant pas le service principal - Résolution < 24h
+- P4 (Cosmétique): Amélioration ou bug mineur - Résolution < 1 semaine
+
+### 2.2 Processus de résolution
+1. Création du ticket dans Jira avec classification
+2. Assignment automatique selon la compétence
+3. Investigation et diagnostic
+4. Communication aux parties prenantes (selon P1/P2)
+5. Résolution et tests
+6. Documentation de la solution dans Confluence
+7. Fermeture du ticket et post-mortem (si P1/P2)
+
+### 2.3 Escalade
+- Escalade niveau 1: Tech support (0-30 min)
+- Escalade niveau 2: Développeurs seniors (30min-2h)
+- Escalade niveau 3: Lead technique + Manager (2h-4h)
+- Escalade niveau 4: CTO + Direction (> 4h ou P1)
+
+## 3. PROCÉDURE DE DÉPLOIEMENT EN PRODUCTION
+
+### 3.1 Prérequis
+- Code review approuvé (minimum 2 reviewers)
+- Tests unitaires passent (coverage > 80%)
+- Tests d'intégration passent
+- Tests end-to-end passent
+- Documentation technique mise à jour
+- Release notes rédigées
+
+### 3.2 Processus de déploiement
+1. Créer une branche release/vX.Y.Z
+2. Merger develop dans release
+3. Build et tests sur l'environnement de staging
+4. Validation fonctionnelle par le Product Owner
+5. Créer un tag git vX.Y.Z
+6. Déploiement sur production (blue/green deployment)
+7. Smoke tests automatiques post-déploiement
+8. Monitoring renforcé pendant 2h
+9. Communication de la release (Slack #releases)
+
+### 3.3 Rollback
+En cas de problème critique:
+1. Décision de rollback par le Lead Tech ou CTO
+2. Exécution du script de rollback automatique
+3. Restauration de la version stable précédente
+4. Communication immédiate à toute l'équipe
+5. Post-mortem obligatoire dans les 24h
+
+## 4. PROCÉDURE DE BACKUP ET RESTORATION
+
+### 4.1 Backup automatique
+- Base de données: Backup complet quotidien à 2h du matin (UTC)
+- Base de données: Backup incrémental toutes les 4h
+- Fichiers: Backup quotidien vers S3 avec versioning
+- Rétention: 30 jours pour les backups quotidiens, 1 an pour les backups mensuels
+
+### 4.2 Tests de restoration
+- Test mensuel de restoration de la base de données
+- Test trimestriel de disaster recovery complet
+- Documentation des temps de restoration (RTO: 4h, RPO: 4h)
+
+### 4.3 Procédure de restoration
+1. Évaluation de l'incident et décision de restoration
+2. Notification de l'équipe et des parties prenantes
+3. Mise en maintenance du service
+4. Restoration de la base de données depuis le dernier backup valide
+5. Restoration des fichiers
+6. Vérification de l'intégrité des données
+7. Tests fonctionnels
+8. Remise en service progressive
+9. Post-mortem et amélioration des processus
+
+## 5. PROCÉDURE DE GESTION DES ACCÈS
+
+### 5.1 Demande d'accès
+- Formulaire de demande d'accès dans le portail IT
+- Validation par le manager direct
+- Validation par le responsable du système cible
+- Provisioning dans les 24h ouvrées
+
+### 5.2 Révocation d'accès
+- Départ d'un employé: Révocation immédiate de tous les accès
+- Changement de poste: Revue et ajustement des accès sous 48h
+- Audit trimestriel des accès avec revue par les managers
+
+### 5.3 Accès privilégiés
+- Accès admin accordés uniquement sur justification métier
+- Revue mensuelle des comptes à privilèges
+- Logs d'audit obligatoires sur toute action admin
+- 2FA obligatoire pour tous les accès admin
+
+## 6. CONTACT ET SUPPORT
+
+Helpdesk IT: helpdesk@company.com
+Téléphone: +33 1 23 45 67 89
+Horaires: Lun-Ven 9h-18h
+Astreinte 24/7 pour incidents P1/P2

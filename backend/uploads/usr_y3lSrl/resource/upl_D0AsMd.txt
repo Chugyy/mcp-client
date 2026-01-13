@@ -1,0 +1,3 @@
+Ceci est un fichier de test pour valider l'upload vers une resource RAG.
+Ligne 2 du fichier test.
+Ligne 3 du fichier test.

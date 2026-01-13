@@ -1,0 +1,21 @@
+ACME Corporation - CloudSync Pro Roadmap Q1-Q2 2025
+
+Q1 2025 (January - March):
+- Launch of mobile app for iOS and Android
+- Integration with Slack and Microsoft Teams
+- Real-time collaboration features
+- File versioning up to 30 versions
+
+Q2 2025 (April - June):
+- AI-powered search across all files
+- Automated backup to AWS S3
+- Two-factor authentication (2FA)
+- End-to-end encryption for Enterprise plan
+- API v2 with webhooks support
+
+Beta features (invitation only):
+- Smart file organization using machine learning
+- Optical Character Recognition (OCR) for scanned documents
+- Video file preview and transcription
+
+For more information, contact product@acme.com

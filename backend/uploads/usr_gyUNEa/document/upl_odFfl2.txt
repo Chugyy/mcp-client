@@ -1,0 +1,24 @@
+ACME Corporation - Pricing Structure 2025
+
+Our flagship product "CloudSync Pro" has the following pricing tiers:
+
+1. Starter Plan: $29/month
+   - Up to 5 users
+   - 100GB storage
+   - Basic support
+
+2. Business Plan: $99/month
+   - Up to 50 users
+   - 1TB storage
+   - Priority support
+   - Advanced analytics
+
+3. Enterprise Plan: $299/month
+   - Unlimited users
+   - 10TB storage
+   - Dedicated account manager
+   - Custom integrations
+   - SLA guarantee 99.9%
+
+Annual discount: 20% off when paying yearly.
+Contact sales@acme.com for custom enterprise pricing.

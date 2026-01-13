@@ -1,0 +1,496 @@
+EXEMPLES DE CODE - PLATEFORME AI CLIENT
+========================================
+
+Ce document contient des exemples de code pour intégrer la plateforme AI Client dans vos applications.
+
+## 1. AUTHENTIFICATION
+
+### 1.1 Login avec email/password
+
+```python
+import requests
+
+def login(email: str, password: str) -> str:
+    """
+    Authenticate user and return access token.
+
+    Args:
+        email: User email
+        password: User password
+
+    Returns:
+        Access token (JWT)
+    """
+    response = requests.post(
+        "http://localhost:8000/api/v1/auth/login",
+        json={"email": email, "password": password}
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    return data["access_token"]
+
+# Usage
+token = login("user@example.com", "mypassword123")
+print(f"Token: {token}")
+```
+
+### 1.2 Utiliser le token dans les requêtes
+
+```python
+import requests
+
+def get_agents(token: str) -> list:
+    """Get all user agents."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = requests.get(
+        "http://localhost:8000/api/v1/agents",
+        headers=headers
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+agents = get_agents(token)
+for agent in agents:
+    print(f"- {agent['name']}: {agent['description']}")
+```
+
+## 2. GESTION DES AGENTS
+
+### 2.1 Créer un agent
+
+```python
+def create_agent(token: str, name: str, system_prompt: str) -> dict:
+    """
+    Create a new agent.
+
+    Args:
+        token: Access token
+        name: Agent name
+        system_prompt: System prompt defining agent behavior
+
+    Returns:
+        Created agent data
+    """
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "name": name,
+        "description": f"Agent for {name}",
+        "system_prompt": system_prompt,
+        "tags": ["custom", "api"],
+        "enabled": True
+    }
+
+    response = requests.post(
+        "http://localhost:8000/api/v1/agents",
+        headers=headers,
+        json=payload
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+agent = create_agent(
+    token=token,
+    name="Code Reviewer",
+    system_prompt="You are an expert code reviewer. Analyze code quality, suggest improvements, and identify potential bugs."
+)
+print(f"Agent created: {agent['id']}")
+```
+
+### 2.2 Mettre à jour un agent
+
+```python
+def update_agent(token: str, agent_id: str, **kwargs) -> dict:
+    """Update an existing agent."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = requests.patch(
+        f"http://localhost:8000/api/v1/agents/{agent_id}",
+        headers=headers,
+        json=kwargs
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+updated_agent = update_agent(
+    token=token,
+    agent_id=agent["id"],
+    enabled=False,
+    description="Updated description"
+)
+```
+
+## 3. GESTION DES RESSOURCES RAG
+
+### 3.1 Créer une ressource
+
+```python
+def create_resource(token: str, name: str, description: str = None) -> dict:
+    """Create a new RAG resource."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "name": name,
+        "description": description,
+        "enabled": True,
+        "embedding_model": "text-embedding-3-large",
+        "embedding_dim": 3072
+    }
+
+    response = requests.post(
+        "http://localhost:8000/api/v1/resources",
+        headers=headers,
+        json=payload
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+resource = create_resource(
+    token=token,
+    name="Documentation Produit",
+    description="Documents de référence produit"
+)
+print(f"Resource created: {resource['id']}")
+```
+
+### 3.2 Uploader un fichier
+
+```python
+def upload_file(token: str, resource_id: str, file_path: str) -> dict:
+    """Upload a file to a resource."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    with open(file_path, 'rb') as f:
+        files = {'file': f}
+        data = {
+            'upload_type': 'resource',
+            'resource_id': resource_id
+        }
+
+        response = requests.post(
+            "http://localhost:8000/api/v1/uploads",
+            headers=headers,
+            files=files,
+            data=data
+        )
+        response.raise_for_status()
+
+    return response.json()
+
+# Usage
+upload = upload_file(
+    token=token,
+    resource_id=resource["id"],
+    file_path="./docs/product-guide.pdf"
+)
+print(f"File uploaded: {upload['filename']}")
+```
+
+### 3.3 Déclencher l'ingestion
+
+```python
+def ingest_resource(token: str, resource_id: str) -> dict:
+    """Trigger RAG ingestion for a resource."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = requests.post(
+        f"http://localhost:8000/api/v1/resources/{resource_id}/ingest",
+        headers=headers
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+result = ingest_resource(token=token, resource_id=resource["id"])
+print(f"Ingestion: {result['message']}")
+```
+
+## 4. CHAT AVEC UN AGENT
+
+### 4.1 Créer une conversation
+
+```python
+def create_chat(token: str, agent_id: str, title: str) -> dict:
+    """Create a new chat with an agent."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "agent_id": agent_id,
+        "title": title
+    }
+
+    response = requests.post(
+        "http://localhost:8000/api/v1/chats",
+        headers=headers,
+        json=payload
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+chat = create_chat(
+    token=token,
+    agent_id=agent["id"],
+    title="Code Review Session"
+)
+print(f"Chat created: {chat['id']}")
+```
+
+### 4.2 Envoyer un message
+
+```python
+def send_message(token: str, chat_id: str, message: str) -> str:
+    """
+    Send a message to an agent and get response.
+
+    Args:
+        token: Access token
+        chat_id: Chat ID
+        message: User message
+
+    Returns:
+        Agent response
+    """
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "message": message,
+        "chat_id": chat_id,
+        "model": "gpt-4-turbo",
+        "top_k": 5  # Number of RAG chunks to retrieve
+    }
+
+    response = requests.post(
+        "http://localhost:8000/api/v1/chat",
+        headers=headers,
+        json=payload
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    return data["response"]
+
+# Usage
+response = send_message(
+    token=token,
+    chat_id=chat["id"],
+    message="Review this Python function for potential improvements"
+)
+print(f"Agent: {response}")
+```
+
+## 5. SERVEURS MCP
+
+### 5.1 Créer un serveur MCP
+
+```python
+def create_mcp_server(token: str, name: str, url: str, api_key: str = None) -> dict:
+    """Create a new MCP server."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "name": name,
+        "url": url,
+        "auth_type": "api-key" if api_key else "none",
+        "enabled": True
+    }
+
+    if api_key:
+        payload["api_key_value"] = api_key
+
+    response = requests.post(
+        "http://localhost:8000/api/v1/servers",
+        headers=headers,
+        json=payload
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+server = create_mcp_server(
+    token=token,
+    name="Weather API",
+    url="https://api.weather.com/mcp",
+    api_key="sk-weather-123456"
+)
+print(f"Server created: {server['id']}")
+```
+
+### 5.2 Synchroniser les tools d'un serveur
+
+```python
+def sync_mcp_server(token: str, server_id: str) -> dict:
+    """Sync tools from an MCP server."""
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = requests.post(
+        f"http://localhost:8000/api/v1/servers/{server_id}/sync",
+        headers=headers
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+# Usage
+result = sync_mcp_server(token=token, server_id=server["id"])
+print(f"Server status: {result['status']}")
+```
+
+## 6. EXEMPLE COMPLET: WORKFLOW RAG
+
+```python
+import requests
+import time
+
+class AIClientSDK:
+    """Simple SDK for AI Client Platform."""
+
+    def __init__(self, base_url: str = "http://localhost:8000/api/v1"):
+        self.base_url = base_url
+        self.token = None
+
+    def login(self, email: str, password: str):
+        """Login and store token."""
+        response = requests.post(
+            f"{self.base_url}/auth/login",
+            json={"email": email, "password": password}
+        )
+        response.raise_for_status()
+        self.token = response.json()["access_token"]
+
+    def _headers(self):
+        """Get auth headers."""
+        return {"Authorization": f"Bearer {self.token}"}
+
+    def create_rag_workflow(self, name: str, files: list[str]) -> dict:
+        """
+        Complete RAG workflow: create resource, upload files, ingest.
+
+        Args:
+            name: Resource name
+            files: List of file paths to upload
+
+        Returns:
+            Resource data with status
+        """
+        # 1. Create resource
+        response = requests.post(
+            f"{self.base_url}/resources",
+            headers=self._headers(),
+            json={"name": name, "enabled": True}
+        )
+        response.raise_for_status()
+        resource = response.json()
+
+        # 2. Upload files
+        for file_path in files:
+            with open(file_path, 'rb') as f:
+                files_data = {'file': f}
+                data = {
+                    'upload_type': 'resource',
+                    'resource_id': resource['id']
+                }
+
+                response = requests.post(
+                    f"{self.base_url}/uploads",
+                    headers=self._headers(),
+                    files=files_data,
+                    data=data
+                )
+                response.raise_for_status()
+
+        # 3. Trigger ingestion
+        response = requests.post(
+            f"{self.base_url}/resources/{resource['id']}/ingest",
+            headers=self._headers()
+        )
+        response.raise_for_status()
+
+        # 4. Wait for ingestion to complete
+        while True:
+            response = requests.get(
+                f"{self.base_url}/resources/{resource['id']}",
+                headers=self._headers()
+            )
+            response.raise_for_status()
+            resource_data = response.json()
+
+            if resource_data['status'] == 'ready':
+                return resource_data
+            elif resource_data['status'] == 'failed':
+                raise Exception(f"Ingestion failed: {resource_data['error_message']}")
+
+            time.sleep(5)  # Wait 5 seconds before checking again
+
+# Usage
+sdk = AIClientSDK()
+sdk.login("user@example.com", "password123")
+
+resource = sdk.create_rag_workflow(
+    name="Technical Documentation",
+    files=["./docs/api.pdf", "./docs/guide.pdf"]
+)
+
+print(f"✅ Resource ready: {resource['name']}")
+print(f"   - {resource['chunk_count']} chunks indexed")
+print(f"   - Indexed at: {resource['indexed_at']}")
+```
+
+## 7. GESTION DES ERREURS
+
+```python
+from requests.exceptions import HTTPError
+
+def safe_api_call(func):
+    """Decorator for safe API calls with error handling."""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                print("❌ Authentication error: Invalid or expired token")
+            elif e.response.status_code == 403:
+                print("❌ Permission denied: You don't have access to this resource")
+            elif e.response.status_code == 404:
+                print("❌ Not found: Resource doesn't exist")
+            elif e.response.status_code == 422:
+                error_detail = e.response.json().get('detail', 'Validation error')
+                print(f"❌ Validation error: {error_detail}")
+            else:
+                print(f"❌ API error ({e.response.status_code}): {e.response.text}")
+            return None
+        except Exception as e:
+            print(f"❌ Unexpected error: {str(e)}")
+            return None
+    return wrapper
+
+@safe_api_call
+def get_agent_safe(token: str, agent_id: str):
+    """Get agent with error handling."""
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(
+        f"http://localhost:8000/api/v1/agents/{agent_id}",
+        headers=headers
+    )
+    response.raise_for_status()
+    return response.json()
+```
+
+## RESSOURCES
+
+Documentation API complète: http://localhost:8000/docs
+SDK Python officiel: pip install ai-client-sdk
+Exemples GitHub: https://github.com/ai-client/examples
